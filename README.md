@@ -1,36 +1,129 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BYD Iloilo - Electric Vehicle Showcase
+
+A modern, responsive website showcasing BYD electric vehicles in Iloilo, featuring advanced UI/UX design with glassmorphism effects and modern typography.
+
+## Features
+
+### 🚗 Models Page (`/models`)
+
+- **Advanced Glassmorphism Design**: Sophisticated glass-like UI elements with backdrop blur effects
+- **Massive Typography**: Large, impactful text with gradient effects and glow animations
+- **Interactive Car Showcase**:
+  - Category filtering (All, Compact, SUV, Sedan, Premium)
+  - Detailed model information with specifications
+  - Interactive modal for detailed view
+  - Hover effects and animations
+- **Responsive Design**: Optimized for all device sizes
+- **Modern Animations**: Floating elements, smooth transitions, and hover effects
+
+### 🎨 Design Features
+
+- **Glassmorphism**: Translucent glass-like cards with backdrop blur
+- **Gradient Backgrounds**: Dynamic purple-to-blue gradients
+- **Glow Effects**: Text and element shadows with color-coded glows
+- **Smooth Transitions**: Cubic-bezier animations for premium feel
+- **Floating Elements**: Animated background elements for depth
+
+### 🛠️ Technical Features
+
+- **Next.js 15**: Latest React framework with App Router
+- **TypeScript**: Full type safety
+- **Tailwind CSS**: Utility-first CSS framework
+- **Responsive Images**: Optimized with Next.js Image component
+- **State Management**: React hooks for interactive features
+
+## Pages
+
+- **Home** (`/`): Main landing page
+- **Models** (`/models`): Vehicle showcase with advanced filtering
+- **About** (`/about`): Company information (to be implemented)
+- **Contact** (`/contact`): Contact form (to be implemented)
 
 ## Getting Started
 
-First, run the development server:
+1. **Install dependencies**:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+   ```bash
+   npm install
+   ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. **Run development server**:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+   ```bash
+   npm run dev
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+3. **Open browser**: Navigate to `http://localhost:3000`
 
-## Learn More
+4. **View Models**: Navigate to `/models` to see the advanced car showcase
 
-To learn more about Next.js, take a look at the following resources:
+## Available Models
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### BYD Atto 3
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Category**: SUV
+- **Price**: ₱1,598,000
+- **Range**: 420 km
+- **Power**: 150 kW
+- **Features**: Blade Battery, 360° Camera, Smart Connectivity, Fast Charging
 
-## Deploy on Vercel
+### BYD Dolphin
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Category**: Compact
+- **Price**: ₱1,398,000
+- **Range**: 380 km
+- **Power**: 130 kW
+- **Features**: Ocean Aesthetics, Advanced Safety, Eco-Friendly, Smart Features
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### BYD Seagull
+
+- **Category**: Compact
+- **Price**: ₱998,000
+- **Range**: 305 km
+- **Power**: 75 kW
+- **Features**: City Friendly, Affordable, Efficient, Easy Parking
+
+## Custom CSS Classes
+
+The project includes custom CSS classes for enhanced glassmorphism effects:
+
+- `.glass-card`: Basic glass effect with backdrop blur
+- `.glass-card-hover`: Enhanced glass effect for hover states
+- `.text-glow`: Text shadow effects
+- `.float-animation`: Floating animation for background elements
+- `.smooth-transition`: Smooth transitions with custom easing
+
+## Browser Support
+
+- Chrome (latest)
+- Firefox (latest)
+- Safari (latest)
+- Edge (latest)
+
+## Performance
+
+- Optimized images with Next.js Image component
+- Efficient CSS animations using transform properties
+- Minimal JavaScript for smooth interactions
+- Responsive design for all screen sizes
+
+## Future Enhancements
+
+- [ ] Add more vehicle models
+- [ ] Implement comparison tool
+- [ ] Add 360° vehicle viewer
+- [ ] Integration with booking system
+- [ ] Multi-language support
+- [ ] Dark/light theme toggle
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## License
+
+This project is licensed under the MIT License.
