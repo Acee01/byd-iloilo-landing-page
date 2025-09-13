@@ -189,9 +189,6 @@ export default function ModelsPage() {
     "MPV",
   ];
 
-  // Intersection Observer for lazy loading
-  const observerRef = useRef<IntersectionObserver | null>(null);
-  const modelRefs = useRef<(HTMLDivElement | null)[]>([]);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -225,23 +222,6 @@ export default function ModelsPage() {
     }
   }, [carModels, prices]);
 
-  // Fallback to show models if intersection observer fails
-  useEffect(() => {
-    if (isLoading) return;
-
-    const fallbackTimer = setTimeout(() => {
-      const modelElements = document.querySelectorAll(".group.cursor-pointer");
-      modelElements.forEach((el, index) => {
-        setTimeout(() => {
-          el.classList.add("opacity-100", "translate-y-0");
-          el.classList.remove("opacity-0", "translate-y-8");
-        }, index * 100);
-      });
-    }, 2000);
-
-    return () => clearTimeout(fallbackTimer);
-  }, [isLoading]);
-
   const filteredModels = useCallback(() => {
     const query = searchQuery.trim().toLowerCase();
     return carModels.filter((model) => {
@@ -268,48 +248,19 @@ export default function ModelsPage() {
     priceRange.max,
   ]);
 
-  // Lazy loading setup
+  // Show all models immediately when not loading
   useEffect(() => {
-    if (typeof window === "undefined" || isLoading) return;
-
-    // Clear previous refs
-    modelRefs.current = [];
-
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const target = entry.target as HTMLElement;
-            target.classList.add("opacity-100", "translate-y-0");
-            target.classList.remove("opacity-0", "translate-y-8");
-          }
+    if (!isLoading && carModels.length > 0) {
+      const timer = setTimeout(() => {
+        const modelElements = document.querySelectorAll(".model-card");
+        modelElements.forEach((el) => {
+          el.classList.add("opacity-100", "translate-y-0");
+          el.classList.remove("opacity-0", "translate-y-8");
         });
-      },
-      { rootMargin: "100px", threshold: 0.1 }
-    );
-
-    return () => observerRef.current?.disconnect();
-  }, [isLoading]);
-
-  // Observe models when they change
-  useEffect(() => {
-    if (typeof window === "undefined" || isLoading || !observerRef.current)
-      return;
-
-    // Wait for next tick to ensure DOM is updated
-    setTimeout(() => {
-      modelRefs.current.forEach((ref) => {
-        if (ref) observerRef.current?.observe(ref);
-      });
-    }, 100);
-  }, [
-    searchQuery,
-    selectedPowertrains,
-    selectedVehicleTypes,
-    priceRange.min,
-    priceRange.max,
-    isLoading,
-  ]);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading, carModels.length]);
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
@@ -721,7 +672,7 @@ export default function ModelsPage() {
                     ></div>
                     <div className="p-8 sm:p-10">
                       <div className="flex items-center gap-4">
-                        <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 border border-white/15 text_white/90">
+                        <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 border border-white/15 text-white/90">
                           <svg
                             className="h-6 w-6"
                             viewBox="0 0 24 24"
@@ -784,10 +735,7 @@ export default function ModelsPage() {
                   {filteredModels().map((model: CarModel, index: number) => (
                     <div
                       key={model.id}
-                      ref={(el) => {
-                        modelRefs.current[index] = el;
-                      }}
-                      className="group opacity-0 translate-y-8 transition-all duration-700 ease-out"
+                      className="model-card group opacity-100 translate-y-0 transition-all duration-700 ease-out"
                       style={{ animationDelay: `${index * 100}ms` }}
                       onMouseEnter={() => setHoveredModel(model.id)}
                       onMouseLeave={() => setHoveredModel(null)}
