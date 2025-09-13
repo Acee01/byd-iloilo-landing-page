@@ -35,11 +35,13 @@ export default function Sidebar({ isOpen, onToggleSidebar }: SidebarProps) {
             <div className="flex items-center justify-between p-5 border-b border-white/10 bg-white/5">
               <div className="text-white flex items-center gap-3">
                 <Image
-                  src="/byd-logo.png"
+                  src="/images/byd-logo.webp"
                   alt="BYD Logo"
                   width={100}
                   height={100}
                   className="opacity-90 drop-shadow"
+                  priority
+                  unoptimized={false}
                 />
               </div>
               <button

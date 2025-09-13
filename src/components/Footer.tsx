@@ -13,7 +13,14 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
           <div>
             <div className="flex items-center gap-3">
-              <Image src="/byd-logo.webp" alt="BYD" width={80} height={80} />
+              <Image
+                src="/images/byd-logo.webp"
+                alt="BYD"
+                width={80}
+                height={80}
+                priority
+                unoptimized={false}
+              />
               <div className="text-white font-semibold">Iloilo</div>
             </div>
             <p className="text-gray-400 text-sm mt-4 max-w-xs">

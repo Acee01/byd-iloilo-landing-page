@@ -47,11 +47,13 @@ export default function Navbar({ showContent, onToggleSidebar }: NavbarProps) {
         >
           <Link href="/">
             <Image
-              src="/byd-logo.png"
+              src="/images/byd-logo.webp"
               alt="BYD Logo"
               width={120}
               height={120}
               className="hover:opacity-50 transition-opacity h-[clamp(15px,4vw,20px)] w-auto"
+              priority
+              unoptimized={false}
             />
           </Link>
           {/* Hover Label */}

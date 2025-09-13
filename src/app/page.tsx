@@ -392,6 +392,8 @@ export default function Home() {
               width={250}
               height={250}
               className="opacity-90"
+              priority
+              unoptimized={false}
             />
           </div>
         </div>
@@ -523,6 +525,7 @@ export default function Home() {
                           fill
                           sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
                           className="object-contain"
+                          unoptimized={false}
                         />
                       </div>
 
@@ -786,10 +789,11 @@ export default function Home() {
                           <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-full bg-white/15 border border-white/20 text-white flex items-center justify-center text-xs font-semibold">
                               <Image
-                                src="/byd-logo.webp"
+                                src="/images/byd-logo.webp"
                                 alt="BYD"
                                 width={24}
                                 height={24}
+                                unoptimized={false}
                               />
                             </div>
                             <span className="text-gray-300 text-xs">
