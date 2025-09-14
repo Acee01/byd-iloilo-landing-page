@@ -201,20 +201,6 @@ export default function ModelsPage() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Set page title and meta description
-  useEffect(() => {
-    document.title = "Our Models | BYD Iloilo - Electric Vehicles Philippines";
-
-    // Update meta description
-    const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) {
-      metaDescription.setAttribute(
-        "content",
-        "Explore our complete range of BYD electric vehicles in Iloilo, Philippines. Browse Atto 3, Dolphin, Seal, Han, Tang, and more. Find the perfect electric car for your sustainable lifestyle."
-      );
-    }
-  }, []);
-
   // Initialize price range once data is available
   useEffect(() => {
     if (carModels.length && prices.length) {
@@ -264,54 +250,12 @@ export default function ModelsPage() {
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
-  // Generate structured data for all models
-  const modelsStructuredData = {
-    "@context": "https://schema.org",
-    "@type": "ItemList",
-    name: "BYD Electric Vehicle Models",
-    description:
-      "Complete range of BYD electric vehicles available in Iloilo, Philippines",
-    itemListElement: carModels.map((model, index) => ({
-      "@type": "ListItem",
-      position: index + 1,
-      item: {
-        "@type": "Product",
-        name: model.name,
-        description: `${model.vehicle_type} - ${model.powertrain.technology}`,
-        image: model.colors.colors[0].image,
-        brand: {
-          "@type": "Brand",
-          name: "BYD",
-        },
-        category: "Electric Vehicle",
-        vehicleType: model.vehicle_type,
-        powertrain: model.powertrain.technology,
-        offers: {
-          "@type": "Offer",
-          price: model.price,
-          priceCurrency: "PHP",
-          availability: "https://schema.org/InStock",
-          seller: {
-            "@type": "Organization",
-            name: "BYD Iloilo",
-          },
-        },
-      },
-    })),
-  };
-
   if (isLoading) {
     return <WireframeSkeleton />;
   }
 
   return (
     <div className="relative min-h-screen bg-black overflow-hidden">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(modelsStructuredData),
-        }}
-      />
       <Sidebar isOpen={isSidebarOpen} onToggleSidebar={toggleSidebar} />
 
       <Navbar showContent={true} onToggleSidebar={toggleSidebar} />

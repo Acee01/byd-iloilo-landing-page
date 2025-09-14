@@ -79,7 +79,7 @@ export default function ModelNotFound() {
         >
           {/* 404 Number */}
           <div className="mb-8">
-            <h1 className="text-6xl sm:text-7xl md:text-8xl font-bold italic text-transparent bg-clip-text bg-gradient-to-r from-white via-white/85 to-white/60 leading-none">
+            <h1 className="text-6xl sm:text-7xl md:text-8xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-white/85 to-white/60 leading-none">
               404
             </h1>
             <div className="w-20 h-1 bg-gradient-to-r from-white via-white/70 to-white/40 mx-auto mt-4"></div>

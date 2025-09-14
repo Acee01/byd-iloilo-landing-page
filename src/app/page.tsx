@@ -1,6 +1,5 @@
 "use client";
 import Image from "next/image";
-import type { Metadata } from "next";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import ScrollToTop from "../components/ScrollToTop";
@@ -35,13 +34,6 @@ export default function Home() {
   const [homeModels, setHomeModels] = useState<CarModel[]>([]);
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
 
-  // Lazy loading states
-  const [visibleSections, setVisibleSections] = useState<Set<string>>(
-    new Set()
-  );
-  const observerRef = useRef<IntersectionObserver | null>(null);
-  const sectionRefs = useRef<Map<string, HTMLElement>>(new Map());
-
   useEffect(() => {
     // Simulate loading time
     const loadingTimer = setTimeout(() => {
@@ -70,76 +62,6 @@ export default function Home() {
       setBlogPosts(posts);
     };
     load();
-  }, []);
-
-  // Helper function to register section for observation
-  const registerSection = (sectionId: string, element: HTMLElement | null) => {
-    if (element) {
-      sectionRefs.current.set(sectionId, element);
-      element.setAttribute("data-section-id", sectionId);
-      if (observerRef.current && !visibleSections.has(sectionId)) {
-        observerRef.current.observe(element);
-      }
-    }
-  };
-
-  // Intersection Observer setup for lazy loading
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          const sectionId = entry.target.getAttribute("data-section-id");
-          if (sectionId) {
-            if (entry.isIntersecting) {
-              setVisibleSections((prev) => new Set(prev).add(sectionId));
-            }
-          }
-        });
-      },
-      {
-        rootMargin: "100px 0px", // Start loading 100px before entering viewport
-        threshold: 0.1,
-      }
-    );
-
-    return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-      }
-    };
-  }, []);
-
-  // Observe sections when they mount
-  useEffect(() => {
-    if (!observerRef.current) return;
-
-    sectionRefs.current.forEach((element, sectionId) => {
-      if (element && !visibleSections.has(sectionId)) {
-        observerRef.current?.observe(element);
-      }
-    });
-  }, [visibleSections]);
-
-  // Make hero section visible immediately
-  useEffect(() => {
-    setVisibleSections((prev) => new Set(prev).add("hero"));
-  }, []);
-
-  // Set page title and meta description
-  useEffect(() => {
-    document.title =
-      "BYD Iloilo - Philippines | Electric Vehicles & Sustainable Mobility";
-
-    // Update meta description
-    const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) {
-      metaDescription.setAttribute(
-        "content",
-        "BYD Iloilo offers premium electric vehicles in the Philippines. Explore our range of electric cars, SUVs, and commercial vehicles including Atto 3, Dolphin, Seal, Han, Tang, and more. Experience sustainable mobility with cutting-edge technology."
-      );
-    }
   }, []);
 
   useEffect(() => {
@@ -328,48 +250,8 @@ export default function Home() {
     return () => observer.disconnect();
   }, []);
 
-  // Generate structured data for featured models
-  const featuredModelsStructuredData = {
-    "@context": "https://schema.org",
-    "@type": "ItemList",
-    name: "Featured BYD Electric Vehicles",
-    description:
-      "Premium electric vehicles available at BYD Iloilo, Philippines",
-    itemListElement: homeModels.slice(0, 6).map((model, index) => ({
-      "@type": "ListItem",
-      position: index + 1,
-      item: {
-        "@type": "Product",
-        name: model.name,
-        description: model.description,
-        image: model.image,
-        brand: {
-          "@type": "Brand",
-          name: "BYD",
-        },
-        category: "Electric Vehicle",
-        offers: {
-          "@type": "Offer",
-          price: model.price,
-          priceCurrency: "PHP",
-          availability: "https://schema.org/InStock",
-          seller: {
-            "@type": "Organization",
-            name: "BYD Iloilo",
-          },
-        },
-      },
-    })),
-  };
-
   return (
     <div className="relative min-h-screen bg-black overflow-hidden">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(featuredModelsStructuredData),
-        }}
-      />
       {/* Scroll Progress */}
       <div className="fixed top-0 left-0 w-full h-[2px] bg-white/5 z-40">
         <div
@@ -406,63 +288,58 @@ export default function Home() {
         className={`relative min-h-screen flex flex-col transition-all duration-1000 ease-in-out ${
           showContent ? "opacity-100" : "opacity-0"
         }`}
-        ref={(el) => registerSection("hero", el)}
       >
-        {visibleSections.has("hero") && (
-          <>
-            {/* Background Car Video */}
-            <div className="absolute inset-0 z-0 w-full h-full">
-              <video
-                ref={videoRef}
-                muted
-                loop
-                playsInline
-                autoPlay
-                className="w-full h-full object-cover object-contain"
+        {/* Background Car Video */}
+        <div className="absolute inset-0 z-0 w-full h-full">
+          <video
+            ref={videoRef}
+            muted
+            loop
+            playsInline
+            autoPlay
+            className="w-full h-full object-cover object-contain"
+          >
+            <source src="/mp4/hero-page-bg.mp4" type="video/mp4" />
+          </video>
+
+          {/* Vignette Effect Overlay */}
+          <div className="absolute inset-0 bg-radial-gradient from-transparent via-transparent to-black/60 pointer-events-none"></div>
+        </div>
+
+        <Navbar showContent={showContent} onToggleSidebar={toggleSidebar} />
+
+        {/* Video Control Button */}
+        <div
+          className={`absolute bottom-4 sm:bottom-6 md:bottom-8 right-4 sm:right-6 md:right-8 z-20 transition-all duration-1000 ease-out delay-1200 ${
+            showContent
+              ? "opacity-100 translate-y-0"
+              : "opacity-0 translate-y-4"
+          }`}
+        >
+          <button
+            onClick={toggleVideo}
+            className="bg-white/10 hover:bg-white/20 text-white p-2 sm:p-3 rounded-full transition-all duration-300 backdrop-blur-md border border-white/20 shadow-[0_4px_20px_rgba(0,0,0,0.4)]"
+            aria-label={isPlaying ? "Pause video" : "Play video"}
+          >
+            {isPlaying ? (
+              <svg
+                className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6"
+                fill="currentColor"
+                viewBox="0 0 24 24"
               >
-                <source src="/mp4/hero-page-bg.webm" type="video/webm" />
-              </video>
-
-              {/* Vignette Effect Overlay */}
-              <div className="absolute inset-0 bg-radial-gradient from-transparent via-transparent to-black/60 pointer-events-none"></div>
-            </div>
-
-            <Navbar showContent={showContent} onToggleSidebar={toggleSidebar} />
-
-            {/* Video Control Button */}
-            <div
-              className={`absolute bottom-4 sm:bottom-6 md:bottom-8 right-4 sm:right-6 md:right-8 z-20 transition-all duration-1000 ease-out delay-1200 ${
-                showContent
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-4"
-              }`}
-            >
-              <button
-                onClick={toggleVideo}
-                className="bg-white/10 hover:bg-white/20 text-white p-2 sm:p-3 rounded-full transition-all duration-300 backdrop-blur-md border border-white/20 shadow-[0_4px_20px_rgba(0,0,0,0.4)]"
-                aria-label={isPlaying ? "Pause video" : "Play video"}
+                <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+              </svg>
+            ) : (
+              <svg
+                className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6"
+                fill="currentColor"
+                viewBox="0 0 24 24"
               >
-                {isPlaying ? (
-                  <svg
-                    className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
-                  </svg>
-                ) : (
-                  <svg
-                    className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
-                )}
-              </button>
-            </div>
-          </>
-        )}
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            )}
+          </button>
+        </div>
       </section>
 
       {/* Models Section */}
@@ -470,257 +347,244 @@ export default function Home() {
         className="relative bg-gradient-to-b from-black via-gray to-black py-20 px-4 sm:px-6 md:px-8 overflow-hidden"
         onMouseMove={handlePointerMove}
         style={{ contentVisibility: "auto", containIntrinsicSize: "1200px" }}
-        ref={(el) => registerSection("models", el)}
       >
-        {visibleSections.has("models") && (
-          <>
-            {/* Background Elements */}
-            <div className="absolute inset-0">
-              <div className="absolute top-20 left-10 w-72 h-72 bg-white/10 rounded-full blur-3xl"></div>
-              <div className="absolute bottom-20 right-10 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
-            </div>
+        {/* Background Elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-white/10 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-20 right-10 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
+        </div>
 
-            {/* Interactive Spotlight + Grid Overlay */}
-            <div
-              className="absolute inset-0 pointer-events-none"
-              style={{
-                background: `radial-gradient(600px at ${pointerPosition.x}% ${pointerPosition.y}%, rgba(255,255,255,0.10), transparent 60%)`,
-              }}
-            />
-            <div
-              className="absolute inset-0 opacity-[0.06] pointer-events-none"
-              style={{
-                backgroundImage:
-                  "linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px)",
-                backgroundSize: "40px 40px, 40px 40px",
-              }}
-            />
+        {/* Interactive Spotlight + Grid Overlay */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: `radial-gradient(600px at ${pointerPosition.x}% ${pointerPosition.y}%, rgba(255,255,255,0.10), transparent 60%)`,
+          }}
+        />
+        <div
+          className="absolute inset-0 opacity-[0.06] pointer-events-none"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px)",
+            backgroundSize: "40px 40px, 40px 40px",
+          }}
+        />
 
-            <div className="container mx-auto relative z-10">
-              {/* Section Header */}
-              <div className="text-start mb-20">
-                <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold italic mb-6 text-transparent bg-clip-text bg-gradient-to-r from-white via-white/85 to-white/60">
-                  MORE BYD MODELS
-                </h2>
-                <p className="text-gray-300 text-sm sm:text-base md:text-lg max-w-3xl leading-relaxed">
-                  Experience the future of mobility with BYD's innovative
-                  electric vehicles
-                </p>
-              </div>
+        <div className="container mx-auto relative z-10">
+          {/* Section Header */}
+          <div className="text-start mb-20">
+            <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold italic mb-6 text-transparent bg-clip-text bg-gradient-to-r from-white via-white/85 to-white/60">
+              MORE BYD MODELS
+            </h2>
+            <p className="text-gray-300 text-sm sm:text-base md:text-lg max-w-3xl leading-relaxed">
+              Experience the future of mobility with BYD's innovative electric
+              vehicles
+            </p>
+          </div>
 
-              {/* Card Grid - Enhanced Flexbox with Hover Effects */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-full mx-auto">
-                {homeModels.slice(0, 3).map((model, idx) => (
-                  <div key={model.id} className="group">
-                    <div className="group relative bg-white/10 backdrop-blur-2xl rounded-2xl border border-white/10 hover:border-white/20 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-white/10 overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.3)] flex flex-col h-full">
-                      {/* Glassmorphism Glow Effect */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-                      {/* Car Image Background */}
-                      <div className="relative w-full h-40 md:h-44 lg:h-48 overflow-hidden flex items-center justify-center">
-                        <div className="absolute inset-0"></div>
-                        <Image
-                          src={model.colors.colors[0].image}
-                          alt={model.name}
-                          fill
-                          sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
-                          className="object-contain"
-                          unoptimized={false}
-                        />
-                      </div>
-
-                      {/* Card Content */}
-                      <div className="p-5 flex flex-col gap-2 grow">
-                        {/* Car Model Name */}
-                        <h3 className="text-xl font-bold text-white leading-tight group-hover:text-white/90 transition-colors duration-300">
-                          {model.name}
-                        </h3>
-
-                        {/* Powertrain Badge */}
-                        <div>
-                          <p className="text-gray-300 text-sm leading-relaxed font-light group-hover:text-gray-200 transition-colors duration-300 line-clamp-1">
-                            {model.vehicle_type}
-                          </p>
-                          <span className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium text-white/90 bg-white/10 border border-white/15 backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]">
-                            <svg
-                              className="h-3.5 w-3.5 text-white/80"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              aria-hidden="true"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M13 3L4 14h6l-1 7 9-11h-6l1-7z"
-                              />
-                            </svg>
-                            {model.powertrain.technology}
-                          </span>
-                        </div>
-
-                        {/* Price */}
-                        <div className="text-start flex items-center gap-2">
-                          <div className="text-gray-400">Starting Price</div>
-                          <div className="font-bold text-white">
-                            {model.price}
-                          </div>
-                        </div>
-
-                        {/* Actions pinned to bottom */}
-                        <ModelActions modelId={model.id} />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="text-center mt-12">
-                <Link
-                  href="/models"
-                  className="inline-flex items-center gap-2 bg-white/10 text-white px-6 py-3 rounded-xl text-sm font-semibold border border-white/20 backdrop-blur-md hover:bg-white/20 transition-colors"
-                >
-                  View all models
-                  <svg
-                    className="w-4 h-4"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M9 5l7 7-7 7"
+          {/* Card Grid - Enhanced Flexbox with Hover Effects */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-full mx-auto">
+            {homeModels.slice(0, 3).map((model, idx) => (
+              <div key={model.id} className="group">
+                <div className="group relative bg-white/10 backdrop-blur-2xl rounded-2xl border border-white/10 hover:border-white/20 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-white/10 overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.3)] flex flex-col h-full">
+                  {/* Glassmorphism Glow Effect */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                  {/* Car Image Background */}
+                  <div className="relative w-full h-40 md:h-44 lg:h-48 overflow-hidden flex items-center justify-center">
+                    <div className="absolute inset-0"></div>
+                    <Image
+                      src={model.colors.colors[0].image}
+                      alt={model.name}
+                      fill
+                      sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+                      className="object-contain"
+                      unoptimized={false}
                     />
-                  </svg>
-                </Link>
+                  </div>
+
+                  {/* Card Content */}
+                  <div className="p-5 flex flex-col gap-2 grow">
+                    {/* Car Model Name */}
+                    <h3 className="text-xl font-bold text-white leading-tight group-hover:text-white/90 transition-colors duration-300">
+                      {model.name}
+                    </h3>
+
+                    {/* Powertrain Badge */}
+                    <div>
+                      <p className="text-gray-300 text-sm leading-relaxed font-light group-hover:text-gray-200 transition-colors duration-300 line-clamp-1">
+                        {model.vehicle_type}
+                      </p>
+                      <span className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium text-white/90 bg-white/10 border border-white/15 backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]">
+                        <svg
+                          className="h-3.5 w-3.5 text-white/80"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          aria-hidden="true"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M13 3L4 14h6l-1 7 9-11h-6l1-7z"
+                          />
+                        </svg>
+                        {model.powertrain.technology}
+                      </span>
+                    </div>
+
+                    {/* Price */}
+                    <div className="text-start flex items-center gap-2">
+                      <div className="text-gray-400">Starting Price</div>
+                      <div className="font-bold text-white">{model.price}</div>
+                    </div>
+
+                    {/* Actions pinned to bottom */}
+                    <ModelActions modelId={model.id} />
+                  </div>
+                </div>
               </div>
-            </div>
-          </>
-        )}
+            ))}
+          </div>
+
+          <div className="text-center mt-12">
+            <Link
+              href="/models"
+              className="inline-flex items-center gap-2 bg-white/10 text-white px-6 py-3 rounded-xl text-sm font-semibold border border-white/20 backdrop-blur-md hover:bg-white/20 transition-colors"
+            >
+              View all models
+              <svg
+                className="w-4 h-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </Link>
+          </div>
+        </div>
       </section>
 
       {/* Smart EV Technology: Video Feature Card */}
       <section
         className="relative bg-gradient-to-b from-black via-black/95 to-black py-24 px-4 sm:px-6 md:px-8 overflow-hidden"
         style={{ contentVisibility: "auto", containIntrinsicSize: "900px" }}
-        ref={(el) => registerSection("technology", el)}
       >
-        {visibleSections.has("technology") && (
-          <>
-            <div className="absolute inset-0">
-              <div className="absolute top-24 left-1/2 -translate-x-1/2 w-[60rem] h-[60rem] bg-white/10 rounded-full blur-3xl"></div>
+        <div className="absolute inset-0">
+          <div className="absolute top-24 left-1/2 -translate-x-1/2 w-[60rem] h-[60rem] bg-white/10 rounded-full blur-3xl"></div>
+        </div>
+        <div className="relative z-10 container mx-auto">
+          <div className="max-w-5xl mx-auto text-center mb-10">
+            <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold italic tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-white/85 to-white/60">
+              SMART EV TECHNOLOGY
+            </h2>
+            <p className="text-gray-300 text-sm sm:text-base md:text-lg mt-5 leading-relaxed max-w-3xl mx-auto">
+              Experience BYD innovation. Hover to preview technology in motion.
+            </p>
+          </div>
+
+          <div
+            className="max-w-full mx-auto group relative overflow-hidden rounded-2xl sm:rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-2xl hover:shadow-white/10 transition-all"
+            onMouseEnter={playTechVideo}
+            onMouseLeave={pauseTechVideo}
+          >
+            {/* Video */}
+            <div className="relative w-full aspect-[4/3] sm:aspect-[16/9]">
+              <video
+                ref={techVideoRef}
+                className="absolute inset-0 w-full h-full object-cover opacity-100"
+                muted={isTechMuted}
+                loop
+                playsInline
+                autoPlay
+                preload="none"
+              >
+                <source
+                  src="https://video.wixstatic.com/video/79c726_280f51abf85342228f7eea7f53bac6c2/1080p/mp4/file.mp4"
+                  type="video/mp4"
+                />
+              </video>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/20 to-transparent pointer-events-none sm:hidden" />
             </div>
-            <div className="relative z-10 container mx-auto">
-              <div className="max-w-5xl mx-auto text-center mb-10">
-                <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold italic tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-white/85 to-white/60">
-                  SMART EV TECHNOLOGY
-                </h2>
-                <p className="text-gray-300 text-sm sm:text-base md:text-lg mt-5 leading-relaxed max-w-3xl mx-auto">
-                  Experience BYD innovation. Hover to preview technology in
-                  motion.
+
+            {/* Card Content (not overlayed on video) */}
+            <div className="relative p-4 sm:p-6 md:p-8 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-3 sm:gap-6">
+              <div className="max-w-xl">
+                <h3 className="text-white text-2xl sm:text-3xl font-bold">
+                  Blade Battery. Intelligent Drive.
+                </h3>
+                <p className="text-gray-200/90 text-sm sm:text-base mt-2 max-w-xl">
+                  Safety-first chemistry, fast charging, and smooth performance
+                  designed for modern electric mobility.
                 </p>
               </div>
-
-              <div
-                className="max-w-full mx-auto group relative overflow-hidden rounded-2xl sm:rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-2xl hover:shadow-white/10 transition-all"
-                onMouseEnter={playTechVideo}
-                onMouseLeave={pauseTechVideo}
-              >
-                {/* Video */}
-                <div className="relative w-full aspect-[4/3] sm:aspect-[16/9]">
-                  <video
-                    ref={techVideoRef}
-                    className="absolute inset-0 w-full h-full object-cover opacity-100"
-                    muted={isTechMuted}
-                    loop
-                    playsInline
-                    autoPlay
-                    preload="none"
-                  >
-                    <source
-                      src="https://video.wixstatic.com/video/79c726_280f51abf85342228f7eea7f53bac6c2/1080p/mp4/file.mp4"
-                      type="video/mp4"
-                    />
-                  </video>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/20 to-transparent pointer-events-none sm:hidden" />
-                </div>
-
-                {/* Card Content (not overlayed on video) */}
-                <div className="relative p-4 sm:p-6 md:p-8 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-3 sm:gap-6">
-                  <div className="max-w-xl">
-                    <h3 className="text-white text-2xl sm:text-3xl font-bold">
-                      Blade Battery. Intelligent Drive.
-                    </h3>
-                    <p className="text-gray-200/90 text-sm sm:text-base mt-2 max-w-xl">
-                      Safety-first chemistry, fast charging, and smooth
-                      performance designed for modern electric mobility.
-                    </p>
-                  </div>
-                  <div className="flex w-full sm:w-auto items-center gap-3">
-                    <button
-                      onClick={toggleTechMute}
-                      className="inline-flex items-center gap-2 bg-white/10 text-white px-3 py-2 rounded-lg text-sm font-semibold border border-white/20 backdrop-blur-md hover:bg-white/20 transition-colors w-full sm:w-auto justify-center"
-                      aria-label={isTechMuted ? "Unmute video" : "Mute video"}
+              <div className="flex w-full sm:w-auto items-center gap-3">
+                <button
+                  onClick={toggleTechMute}
+                  className="inline-flex items-center gap-2 bg-white/10 text-white px-3 py-2 rounded-lg text-sm font-semibold border border-white/20 backdrop-blur-md hover:bg-white/20 transition-colors w-full sm:w-auto justify-center"
+                  aria-label={isTechMuted ? "Unmute video" : "Mute video"}
+                >
+                  {isTechMuted ? (
+                    <svg
+                      className="w-4 h-4"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
                     >
-                      {isTechMuted ? (
-                        <svg
-                          className="w-4 h-4"
-                          viewBox="0 0 24 24"
-                          fill="currentColor"
-                        >
-                          <path d="M5 9v6h4l5 5V4L9 9H5z" />
-                        </svg>
-                      ) : (
-                        <svg
-                          className="w-4 h-4"
-                          viewBox="0 0 24 24"
-                          fill="currentColor"
-                        >
-                          <path d="M5 9v6h4l5 5V4L9 9H5z" />
-                          <path
-                            d="M16.5 12a4.5 4.5 0 010 6.364M19 9a7 7 0 010 9.9"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            fill="none"
-                            strokeLinecap="round"
-                          />
-                        </svg>
-                      )}
-                      <span>{isTechMuted ? "Unmute" : "Mute"}</span>
-                    </button>
-                    <button
-                      onClick={toggleTechPlayPause}
-                      className="inline-flex items-center gap-2 bg-white/10 text-white px-3 py-2 rounded-lg text-sm font-semibold border border-white/20 backdrop-blur-md hover:bg-white/20 transition-colors w-full sm:w-auto justify-center"
-                      aria-label={isTechPlaying ? "Pause video" : "Play video"}
+                      <path d="M5 9v6h4l5 5V4L9 9H5z" />
+                    </svg>
+                  ) : (
+                    <svg
+                      className="w-4 h-4"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
                     >
-                      {isTechPlaying ? (
-                        <svg
-                          className="w-4 h-4"
-                          viewBox="0 0 24 24"
-                          fill="currentColor"
-                        >
-                          <path d="M6 4h4v16H6zM14 4h4v16h-4z" />
-                        </svg>
-                      ) : (
-                        <svg
-                          className="w-4 h-4"
-                          viewBox="0 0 24 24"
-                          fill="currentColor"
-                        >
-                          <path d="M8 5v14l11-7z" />
-                        </svg>
-                      )}
-                      <span>{isTechPlaying ? "Pause" : "Play"}</span>
-                    </button>
-                  </div>
-                </div>
+                      <path d="M5 9v6h4l5 5V4L9 9H5z" />
+                      <path
+                        d="M16.5 12a4.5 4.5 0 010 6.364M19 9a7 7 0 010 9.9"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        fill="none"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  )}
+                  <span>{isTechMuted ? "Unmute" : "Mute"}</span>
+                </button>
+                <button
+                  onClick={toggleTechPlayPause}
+                  className="inline-flex items-center gap-2 bg-white/10 text-white px-3 py-2 rounded-lg text-sm font-semibold border border-white/20 backdrop-blur-md hover:bg-white/20 transition-colors w-full sm:w-auto justify-center"
+                  aria-label={isTechPlaying ? "Pause video" : "Play video"}
+                >
+                  {isTechPlaying ? (
+                    <svg
+                      className="w-4 h-4"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path d="M6 4h4v16H6zM14 4h4v16h-4z" />
+                    </svg>
+                  ) : (
+                    <svg
+                      className="w-4 h-4"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  )}
+                  <span>{isTechPlaying ? "Pause" : "Play"}</span>
+                </button>
               </div>
             </div>
-          </>
-        )}
+          </div>
+        </div>
       </section>
 
       {/* Blog Section */}
@@ -728,82 +592,125 @@ export default function Home() {
         className="relative bg-gradient-to-b from-black via-[#0b0b0b] to-black py-24 px-4 sm:px-6 md:px-8 overflow-hidden"
         onMouseMove={handlePointerMove}
         style={{ contentVisibility: "auto", containIntrinsicSize: "1000px" }}
-        ref={(el) => registerSection("blog", el)}
       >
-        {visibleSections.has("blog") && (
-          <>
-            <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute top-10 right-10 w-72 h-72 bg-white/10 rounded-full blur-3xl opacity-30"></div>
-            </div>
-            <div
-              className="absolute inset-0 pointer-events-none"
-              style={{
-                background: `radial-gradient(600px at ${pointerPosition.x}% ${pointerPosition.y}%, rgba(255,255,255,0.10), transparent 60%)`,
-              }}
-            />
-            <div
-              className="absolute inset-0 opacity-[0.05] pointer-events-none"
-              style={{
-                backgroundImage:
-                  "linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px)",
-                backgroundSize: "40px 40px, 40px 40px",
-              }}
-            />
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-10 right-10 w-72 h-72 bg-white/10 rounded-full blur-3xl opacity-30"></div>
+        </div>
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: `radial-gradient(600px at ${pointerPosition.x}% ${pointerPosition.y}%, rgba(255,255,255,0.10), transparent 60%)`,
+          }}
+        />
+        <div
+          className="absolute inset-0 opacity-[0.05] pointer-events-none"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px)",
+            backgroundSize: "40px 40px, 40px 40px",
+          }}
+        />
 
-            <div className="relative z-10 container mx-auto">
-              <div className="text-start mx-auto mb-14">
-                <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold italic tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-white/85 to-white/60">
-                  From the BYD Journal
-                </h2>
-                <p className="text-gray-300 text-sm sm:text-base md:text-lg mt-4">
-                  Stories, insights, and updates on electric mobility.
-                </p>
-              </div>
+        <div className="relative z-10 container mx-auto">
+          <div className="text-start mx-auto mb-14">
+            <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold italic tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-white/85 to-white/60">
+              From the BYD Journal
+            </h2>
+            <p className="text-gray-300 text-sm sm:text-base md:text-lg mt-4">
+              Stories, insights, and updates on electric mobility.
+            </p>
+          </div>
 
-              {blogPosts.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mx-auto">
-                  {/* Featured Post */}
-                  <Link
-                    href={blogPosts[0].href}
-                    className="group relative rounded-3xl p-[1px] bg-gradient-to-br from-white/20 via-white/5 to-transparent hover:from-white/40 hover:via-white/10 transition-all duration-500"
-                  >
-                    <div className="relative overflow-hidden rounded-3xl bg-white/10 border border-white/10 backdrop-blur-2xl h-full shadow-[0_8px_30px_rgba(0,0,0,0.3)]">
-                      <div className="relative w-full aspect-[16/9] overflow-hidden">
-                        <img
-                          src={blogPosts[0].image}
-                          alt={blogPosts[0].title}
-                          className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.06] transition-transform duration-700"
-                          loading="lazy"
-                          decoding="async"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+          {blogPosts.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mx-auto">
+              {/* Featured Post */}
+              <Link
+                href={blogPosts[0].href}
+                className="group relative rounded-3xl p-[1px] bg-gradient-to-br from-white/20 via-white/5 to-transparent hover:from-white/40 hover:via-white/10 transition-all duration-500"
+              >
+                <div className="relative overflow-hidden rounded-3xl bg-white/10 border border-white/10 backdrop-blur-2xl h-full shadow-[0_8px_30px_rgba(0,0,0,0.3)]">
+                  <div className="relative w-full aspect-[16/9] overflow-hidden">
+                    <img
+                      src={blogPosts[0].image}
+                      alt={blogPosts[0].title}
+                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.06] transition-transform duration-700"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+                  </div>
+                  <div className="p-7 flex flex-col gap-4">
+                    <h3 className="text-white text-2xl sm:text-3xl font-bold leading-tight group-hover:text-white/90 transition-colors">
+                      {blogPosts[0].title}
+                    </h3>
+                    <p className="text-gray-300 text-sm sm:text-base leading-relaxed max-w-2xl line-clamp-3 overflow-hidden">
+                      {blogPosts[0].excerpt}
+                    </p>
+                    <div className="flex items-center justify-between mt-1">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-white/15 border border-white/20 text-white flex items-center justify-center text-xs font-semibold">
+                          <Image
+                            src="/images/byd-logo.webp"
+                            alt="BYD"
+                            width={24}
+                            height={24}
+                            unoptimized={false}
+                          />
+                        </div>
+                        <span className="text-gray-300 text-xs">
+                          {blogPosts[0].date}
+                        </span>
                       </div>
-                      <div className="p-7 flex flex-col gap-4">
-                        <h3 className="text-white text-2xl sm:text-3xl font-bold leading-tight group-hover:text-white/90 transition-colors">
-                          {blogPosts[0].title}
+                      <div className="inline-flex items-center gap-2 text-white/90 group-hover:text-white transition-colors text-sm font-semibold">
+                        Read article
+                        <svg
+                          className="w-4 h-4"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M9 5l7 7-7 7"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+
+              {/* Two Stacked Posts */}
+              <div className="grid grid-rows-2 gap-6">
+                {blogPosts.slice(1, 3).map((post, idx) => (
+                  <Link
+                    key={idx}
+                    href={post.href}
+                    className="group relative overflow-hidden rounded-3xl bg-white/10 border border-white/10 backdrop-blur-2xl transition-all duration-500 hover:scale-[1.01] hover:border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.3)]"
+                  >
+                    <div className="relative w-full h-full min-h-[180px] md:min-h-[220px]">
+                      <img
+                        src={post.image}
+                        alt={post.title}
+                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.05] transition-transform duration-700"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+                      <div className="absolute inset-x-0 bottom-0 p-6">
+                        <h3 className="text-white text-xl font-bold leading-tight group-hover:text-white/90 transition-colors">
+                          {post.title}
                         </h3>
-                        <p className="text-gray-300 text-sm sm:text-base leading-relaxed max-w-2xl line-clamp-3 overflow-hidden">
-                          {blogPosts[0].excerpt}
-                        </p>
-                        <div className="flex items-center justify-between mt-1">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-white/15 border border-white/20 text-white flex items-center justify-center text-xs font-semibold">
-                              <Image
-                                src="/images/byd-logo.webp"
-                                alt="BYD"
-                                width={24}
-                                height={24}
-                                unoptimized={false}
-                              />
-                            </div>
-                            <span className="text-gray-300 text-xs">
-                              {blogPosts[0].date}
-                            </span>
-                          </div>
-                          <div className="inline-flex items-center gap-2 text-white/90 group-hover:text-white transition-colors text-sm font-semibold">
+                        <div className="mt-2 flex items-center justify-between">
+                          <span className="text-gray-300 text-xs">
+                            {post.date}
+                          </span>
+                          <span className="inline-flex items-center gap-2 text-white/90 group-hover:text-white transition-colors text-xs font-semibold">
                             Read article
                             <svg
-                              className="w-4 h-4"
+                              className="w-3.5 h-3.5"
                               viewBox="0 0 24 24"
                               fill="none"
                               stroke="currentColor"
@@ -815,86 +722,38 @@ export default function Home() {
                                 d="M9 5l7 7-7 7"
                               />
                             </svg>
-                          </div>
+                          </span>
                         </div>
                       </div>
                     </div>
                   </Link>
-
-                  {/* Two Stacked Posts */}
-                  <div className="grid grid-rows-2 gap-6">
-                    {blogPosts.slice(1, 3).map((post, idx) => (
-                      <Link
-                        key={idx}
-                        href={post.href}
-                        className="group relative overflow-hidden rounded-3xl bg-white/10 border border-white/10 backdrop-blur-2xl transition-all duration-500 hover:scale-[1.01] hover:border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.3)]"
-                      >
-                        <div className="relative w-full h-full min-h-[180px] md:min-h-[220px]">
-                          <img
-                            src={post.image}
-                            alt={post.title}
-                            className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.05] transition-transform duration-700"
-                            loading="lazy"
-                            decoding="async"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-                          <div className="absolute inset-x-0 bottom-0 p-6">
-                            <h3 className="text-white text-xl font-bold leading-tight group-hover:text-white/90 transition-colors">
-                              {post.title}
-                            </h3>
-                            <div className="mt-2 flex items-center justify-between">
-                              <span className="text-gray-300 text-xs">
-                                {post.date}
-                              </span>
-                              <span className="inline-flex items-center gap-2 text-white/90 group-hover:text-white transition-colors text-xs font-semibold">
-                                Read article
-                                <svg
-                                  className="w-3.5 h-3.5"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="currentColor"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d="M9 5l7 7-7 7"
-                                  />
-                                </svg>
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div className="text-center mt-12">
-                <Link
-                  href="/blogs"
-                  className="inline-flex items-center gap-2 bg-white/10 text-white px-6 py-3 rounded-xl text-sm font-semibold border border-white/20 backdrop-blur-md hover:bg-white/20 transition-colors"
-                >
-                  View all posts
-                  <svg
-                    className="w-4 h-4"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
-                </Link>
+                ))}
               </div>
             </div>
-          </>
-        )}
+          )}
+
+          <div className="text-center mt-12">
+            <Link
+              href="/blogs"
+              className="inline-flex items-center gap-2 bg-white/10 text-white px-6 py-3 rounded-xl text-sm font-semibold border border-white/20 backdrop-blur-md hover:bg-white/20 transition-colors"
+            >
+              View all posts
+              <svg
+                className="w-4 h-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </Link>
+          </div>
+        </div>
       </section>
 
       {/* Tools Section */}
