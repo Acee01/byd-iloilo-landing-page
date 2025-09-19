@@ -57,32 +57,6 @@ A modern, responsive website showcasing BYD electric vehicles in Iloilo, featuri
 
 4. **View Models**: Navigate to `/models` to see the advanced car showcase
 
-## Available Models
-
-### BYD Atto 3
-
-- **Category**: SUV
-- **Price**: ₱1,598,000
-- **Range**: 420 km
-- **Power**: 150 kW
-- **Features**: Blade Battery, 360° Camera, Smart Connectivity, Fast Charging
-
-### BYD Dolphin
-
-- **Category**: Compact
-- **Price**: ₱1,398,000
-- **Range**: 380 km
-- **Power**: 130 kW
-- **Features**: Ocean Aesthetics, Advanced Safety, Eco-Friendly, Smart Features
-
-### BYD Seagull
-
-- **Category**: Compact
-- **Price**: ₱998,000
-- **Range**: 305 km
-- **Power**: 75 kW
-- **Features**: City Friendly, Affordable, Efficient, Easy Parking
-
 ## Custom CSS Classes
 
 The project includes custom CSS classes for enhanced glassmorphism effects:
@@ -115,15 +89,3 @@ The project includes custom CSS classes for enhanced glassmorphism effects:
 - [ ] Integration with booking system
 - [ ] Multi-language support
 - [ ] Dark/light theme toggle
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
-## License
-
-This project is licensed under the MIT License.
